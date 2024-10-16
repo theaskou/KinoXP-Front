@@ -4,11 +4,12 @@ import {fetchAnyUrl, postObjectAsJson} from "./modulejson.js";
 const screeningID = sessionStorage.getItem("screeningID");
 const cinemaID = JSON.parse(sessionStorage.getItem("cinemaID"));
 const selectedSeats = JSON.parse(sessionStorage.getItem("selectedSeats"));
+let createdTickets = [];
 
 // URLs for API requests
 const urlPostTicket = "http://localhost:8080/postticket";
 const urlFindSeats = `http://localhost:8080/seat`;
-const urlScreening = `http://localhost:8080/screenings/${screeningID}/screening`
+const urlScreening = `http://localhost:8080/selectedscreening/screeningID=${screeningID}`
 
 let seat = []
 // Fetch seat object based on row and seat number
@@ -35,11 +36,10 @@ async function getSeat(rowNr, seatNr) {
     }
 }
 
-let screening = []
 // Fetch the full screening object
 async function getScreening() {
     try {
-        screening = await fetchAnyUrl(urlScreening);
+        return await fetchAnyUrl(urlScreening);
     } catch (error) {
         console.error("Error fetching screening:", error);
         throw error;
@@ -49,7 +49,7 @@ async function getScreening() {
 // Create a ticket object for each seat and include the screening object
 function createTicket(seat, screening) {
     const ticket = {};
-    ticket.name = document.getElementById("name").value;  // User's name from input
+    ticket.customerName = document.getElementById("name").value;  // User's name from input
     ticket.seat = seat;  // Attach the full seat object to the ticket
     ticket.screening = screening;  // Attach the full screening object to the ticket
     return ticket;
@@ -68,6 +68,7 @@ async function postTicketsForSelectedSeats() {
             }
             const ticket = createTicket(seat, screening);  // Create ticket with seat and screening
             await postObjectAsJson(urlPostTicket, ticket);  // Post the ticket
+            createdTickets.push(ticket);
             console.log(`Posted ticket for seat: row ${seat.rowNr} seat ${seat.seatNr}`);
         }
 
@@ -84,4 +85,5 @@ async function postTicketsForSelectedSeats() {
 document.getElementById("createTicket").addEventListener("submit", async (event) => {
     event.preventDefault();  // Prevent default form submission
     await postTicketsForSelectedSeats();  // Post a ticket for each selected seat
+    sessionStorage.setItem("createdTickets", JSON.stringify(createdTickets));
 });

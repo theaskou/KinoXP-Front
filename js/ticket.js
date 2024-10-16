@@ -1,12 +1,5 @@
-import {fetchAnyUrl, restDelete} from "./modulejson.js";
-
-console.log("Jeg er i ticket.js")
-
-const tempTicketId = 1;
-const urlTicket = "http://localhost:8080/ticket"
-const urlFindTicketById = `http://localhost:8080/seat/${tempTicketId}/ticket`
 const tblTicket = document.getElementById("tblTicket")
-const pbGetTicket = document.getElementById("pbGetTicket")
+const createdTickets = JSON.parse(sessionStorage.getItem("createdTickets"));
 
 function ticketTable(tickets){
     let cellCount = 0
@@ -31,20 +24,10 @@ function ticketTable(tickets){
 
     cell = row.insertCell(cellCount++)
     cell.innerHTML = `Pris: ${tickets.seat.price}`
-
-}
-
-
-let tickets = []
-
-async function fetchTickets() {
-    tickets = await fetchAnyUrl(urlTicket)
-    tickets.forEach(ticketTable)
 }
 
 function actionGetTickets() {
-    fetchTickets()
+    createdTickets.forEach(ticketTable)
 }
 
 document.addEventListener("DOMContentLoaded", actionGetTickets)
-//pbGetTicket.addEventListener('click', actionGetTickets)
